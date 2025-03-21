@@ -1,9 +1,10 @@
 use poise::serenity_prelude as serenity;
 use poise::CreateReply;
 use std::time::Instant;
+use lavalink_rs::prelude::LavalinkClient;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, (), Error>;
+type Context<'a> = poise::Context<'a, LavalinkClient, Error>;
 
 #[poise::command(slash_command, prefix_command)]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {

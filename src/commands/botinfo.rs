@@ -5,9 +5,10 @@ use chrono::Utc;
 use chrono_tz::Asia::Bangkok;
 use poise::serenity_prelude as serenity;
 use poise::CreateReply;
+use lavalink_rs::prelude::LavalinkClient;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, (), Error>;
+type Context<'a> = poise::Context<'a, LavalinkClient, Error>;
 
 #[poise::command(slash_command, prefix_command)]
 pub async fn botinfo(ctx: Context<'_>) -> Result<(), Error> {

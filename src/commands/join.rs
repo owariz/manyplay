@@ -1,10 +1,11 @@
 use poise::CreateReply;
+use lavalink_rs::prelude::LavalinkClient;
+use poise::serenity_prelude::*;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
-type Context<'a> = poise::Context<'a, (), Error>;
+type Context<'a> = poise::Context<'a, LavalinkClient, Error>;
 
-#[poise::command(slash_command, prefix_command)]
-pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn join_helper(ctx: Context<'_>) -> Result<bool, Error> {
     let guild_id = ctx.guild_id().ok_or("Must be in a guild")?;
     let member_id = ctx.author().id;
     
@@ -33,13 +34,19 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
                     .content("Joined voice channel and deafened bot!"))
                     .await?;
             }
+            Ok(true)
         }
         Err(e) => {
             ctx.send(CreateReply::default()
                 .content(format!("Failed to join voice channel: {}", e)))
                 .await?;
+            Ok(false)
         }
     }
-    
+}
+
+#[poise::command(slash_command, prefix_command)]
+pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
+    join_helper(ctx).await?;
     Ok(())
 }

@@ -1,8 +1,10 @@
 use glob::glob;
+use crate::commands;
+use lavalink_rs::prelude::LavalinkClient;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
-pub async fn load_commands() -> Vec<poise::Command<(), Error>> {
+pub async fn load_commands() -> Vec<poise::Command<LavalinkClient, Error>> {
     let mut commands = vec![];
 
     for entry in glob("src/commands/*.rs").expect("Failed to read glob pattern") {
@@ -14,14 +16,17 @@ pub async fn load_commands() -> Vec<poise::Command<(), Error>> {
             }
 
             if module_name == "ping" {
-                commands.push(crate::commands::ping::ping());
+                commands.push(commands::ping::ping());
                 println!("Loaded command: ping");
             } else if module_name == "botinfo" {
-                commands.push(crate::commands::botinfo::botinfo());
+                commands.push(commands::botinfo::botinfo());
                 println!("Loaded command: botinfo");
             } else if module_name == "join" {
-                commands.push(crate::commands::join::join());
+                commands.push(commands::join::join());
                 println!("Loaded command: join");
+            } else if module_name == "play" {
+                commands.push(commands::play::play());
+                println!("Loaded command: play");
             } else {
                 println!("Unknown module: {}", module_name);
             }
