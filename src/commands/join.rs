@@ -6,7 +6,6 @@ type Context<'a> = poise::Context<'a, (), Error>;
 #[poise::command(slash_command, prefix_command)]
 pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
     let guild_id = ctx.guild_id().ok_or("Must be in a guild")?;
-
     let member_id = ctx.author().id;
 
     let channel_id = ctx
@@ -24,22 +23,18 @@ pub async fn join(ctx: Context<'_>) -> Result<(), Error> {
         .values()
         .any(|vs| vs.channel_id == Some(channel_id))
     {
-        let manager = songbird::get(ctx.serenity_context()).await; // ลบ .expect()
+        let manager = songbird::get(ctx.serenity_context()).await
+            .ok_or("Songbird Voice client not initialized")?;
+        
+        // Join the channel
+        let _handler = manager.join(guild_id, channel_id).await;
 
-        match manager {
-            Some(manager) => {
-                let manager = manager.clone();
-                match manager.join(guild_id, channel_id).await {
-                    Ok(_call) => {
-                        ctx.send(CreateReply::default().content("Joined voice channel!")).await?;
-                    }
-                    Err(e) => {
-                        ctx.send(CreateReply::default().content(format!("Failed to join voice channel: {}", e))).await?;
-                    }
-                }
+        match _handler {
+            Ok(_) => {
+                ctx.send(CreateReply::default().content("Joined voice channel!")).await?;
             }
-            None => {
-                ctx.send(CreateReply::default().content("Songbird Voice client not initialized.")).await?;
+            Err(e) => {
+                ctx.send(CreateReply::default().content(format!("Failed to join voice channel: {}", e))).await?;
             }
         }
     } else {

@@ -1,6 +1,6 @@
 use poise::serenity_prelude as serenity;
 use dotenv::dotenv;
-use songbird::SongbirdKey; // เปลี่ยน SerenityInit เป็น SongbirdKey
+use songbird::SerenityInit;
 
 mod commands;
 mod utils;
@@ -9,7 +9,7 @@ mod utils;
 async fn main() {
     dotenv().ok();
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
-    let intents = serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::GUILDS;
+    let intents = serenity::GatewayIntents::non_privileged() | serenity::GatewayIntents::GUILDS | serenity::GatewayIntents::GUILD_VOICE_STATES;
 
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
@@ -18,7 +18,6 @@ async fn main() {
         })
         .setup(|ctx, ready, framework| {
             Box::pin(async move {
-                ctx.data.write().await.insert::<SongbirdKey>(songbird::Songbird::serenity()); // ใช้ SongbirdKey
                 utils::startup::startup(ctx, ready, framework).await?;
                 Ok(())
             })
@@ -27,6 +26,7 @@ async fn main() {
 
     let client = serenity::ClientBuilder::new(token, intents)
         .framework(framework)
+        .register_songbird()
         .await;
     client.unwrap().start().await.unwrap();
 }
